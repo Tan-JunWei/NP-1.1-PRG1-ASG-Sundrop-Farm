@@ -131,13 +131,17 @@ def in_shop(game_vars,seeds,seed_list):
                 print(f"You have ${game_vars["money"]}.")
                 try:
                     purchase_quantity = int(input("How many do you wish to buy? "))
-                    match purchase_choice:
-                        case "1":
-                            total_cost = purchase_quantity * seeds["LET"]['price']
-                        case "2":
-                            total_cost = purchase_quantity * seeds["POT"]['price']
-                        case "3":
-                            total_cost = purchase_quantity * seeds["CAU"]['price']
+                    if purchase_quantity > 0: # CHECK: purchase_quantity is positive integer
+                        match purchase_choice:
+                            case "1":
+                                total_cost = purchase_quantity * seeds["LET"]['price']
+                            case "2":
+                                total_cost = purchase_quantity * seeds["POT"]['price']
+                            case "3":
+                                total_cost = purchase_quantity * seeds["CAU"]['price']
+                    else:
+                        print("Please enter a valid quantity") # Error message if purchase_quantity is not positive integer
+                        continue
 
                     # Buying seeds with sufficient money
                     if total_cost <= game_vars['money']:
