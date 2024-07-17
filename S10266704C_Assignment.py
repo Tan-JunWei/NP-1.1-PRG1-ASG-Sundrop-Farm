@@ -272,8 +272,58 @@ def find_position(farm):
             
 def move(farm, farm_choice, game_vars):
     '''
+    Handles the movement of player on the farm. Player starts at (2,2), at the
+    farmhouse.
+
+    Possible actions:
+    W, A, S, D - Moves the player
+    - Will show error message if attempting to move off the edge
+    - If move is successful, Energy is reduced by 1
+
+    Args:
+        farm_choice: Player's choice to move
+        farm: A list of lists containing the farm layout
+        game_vars: A dictionary containing game variables('day','energy','money','bag')
+    '''
+
+    row, col = find_position(farm)
+
+    if game_vars['energy'] > 0:
+        moved = False
+
+        # Move up
+        if farm_choice == 'W' and row > 0 and farm[row-1][col][1] == '':
+            farm[row][col][1], farm[row- 1][col][1] = '', 'X'
+            moved = True
+        # Move left
+        elif farm_choice == 'A' and col > 0 and farm[row][col-1][1] == '':
+            farm[row][col][1], farm[row][col - 1][1] = '', 'X'
+            moved = True
+        # Move down
+        elif farm_choice == 'S' and row < (len(farm) - 1) and farm[row+1][col][1] == '':
+            farm[row][col][1], farm[row + 1][col][1] = '', 'X'
+            moved = True
+        # Move right
+        elif farm_choice == 'D' and col < (len(farm[0]) - 1) and farm[row][col+1][1] == '':
+            farm[row][col][1], farm[row][col + 1][1] = '', 'X'
+            moved = True
+        else:
+            print("Sorry, you are not allowed to move in that direction.")
+    
+        if moved:
+            game_vars['energy'] -= 1 # Energy is reduced by 1 if move is successful
+    
+    # If energy is zero, then player can still input WASD, but the X will not move.
+    # Instead, it prints the 'tired' message.
+    else:
+        print("You are too tired. You should get back to town.")
+
+    visit_farm(farm, game_vars)
+
+def in_farm():
+    '''
     Handles the actions on the farm. Player starts at (2,2), at the
-        farmhouse.
+    farmhouse.
 
     Possible actions:
     W, A, S, D - Moves the player
@@ -293,52 +343,7 @@ def move(farm, farm_choice, game_vars):
 
     R - Return to town
         - Does not cost energy
-
-    Args:
-        farm_choice: Player's choice to move
-        farm: A list of lists containing the farm layout
-        game_vars: A dictionary containing game variables('day','energy','money','bag')
     '''
-
-    row, col = find_position(farm)
-
-    if game_vars['energy'] > 0:
-        moved = False
-
-        # Move up
-        if farm_choice == 'W' and row > 0 and farm[row-1][col][1] == '':
-            farm[row][col][1], farm[row- 1][col][1] = '', 'X'
-            moved = True
-        
-        # Move left
-        elif farm_choice == 'A' and col > 0 and farm[row][col-1][1] == '':
-            farm[row][col][1], farm[row][col - 1][1] = '', 'X'
-            moved = True
-        
-        # Move down
-        elif farm_choice == 'S' and row < (len(farm) - 1) and farm[row+1][col][1] == '':
-            farm[row][col][1], farm[row + 1][col][1] = '', 'X'
-            moved = True
-
-        # Move right
-        elif farm_choice == 'D' and col < (len(farm[0]) - 1) and farm[row][col+1][1] == '':
-            farm[row][col][1], farm[row][col + 1][1] = '', 'X'
-            moved = True
-            
-        else:
-            print("Sorry, you are not allowed to move in that direction.")
-    
-        if moved:
-            game_vars['energy'] -= 1
-    
-    # If energy is zero, then player can still input WASD, but the X will not move.
-    # Instead, it prints the 'tired' message.
-    else:
-        print("You are too tired. You should get back to town.")
-
-    visit_farm(farm, game_vars)
-
-def in_farm():
     visit_farm(farm,game_vars)
     while True:
         try:
