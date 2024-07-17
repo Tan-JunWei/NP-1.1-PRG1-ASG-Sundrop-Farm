@@ -85,8 +85,8 @@ def display_bag_contents(game_vars):
     print("+-----------------------------------------------+")
     print(f"| Day {game_vars['day']:<10} Energy: {game_vars["energy"]:<10} Money: ${game_vars["money"]:<4}|")
     print(f"{'| Your seeds:':<48}|")
-    for seed,quantity in game_vars['bag'].items():
-        print(f"|   {seed:<15}: {quantity:>5}{'':22}|")
+    for seed, statistics in game_vars['bag'].items():
+        print(f"|   {seed:<15}: {statistics[2]:>5}{'':22}|")
     print("+-----------------------------------------------+")
 
 def in_shop(game_vars,seeds,seed_list):
@@ -148,14 +148,16 @@ def in_shop(game_vars,seeds,seed_list):
                         game_vars['money'] -= total_cost
 
                         # Convert purchase_choice number into index of seed_list, and use the seed name as key
-                        # to access seeds dictionary. 
-                        seed_name = seeds[seed_list[int(purchase_choice)-1]]['name']
+                        # to access seeds dictionary.
+                        index = int(purchase_choice)-1 
+                        seed_name = seeds[seed_list[index]]['name'] # seed_list = ['LET', 'POT', 'CAU']
+                        # seed name can be "Lettuce", "Potato", "Cauliflower"
 
                         # Update dictionary accordingly
                         if seed_name in game_vars['bag']:
-                            game_vars['bag'][seed_name] += purchase_quantity
+                            game_vars['bag'][seed_name][2] += purchase_quantity
                         else:
-                            game_vars['bag'][seed_name] = purchase_quantity
+                            game_vars['bag'][seed_name] = [seeds[seed_list[index]]['growth_time'], seeds[seed_list[index]]['crop_price'], purchase_quantity]
 
                         print(f"You bought {purchase_quantity} {seed_name} seeds.")
                         display_bag_contents(game_vars)
@@ -324,6 +326,32 @@ def move(farm, farm_choice, game_vars):
 
     visit_farm(farm, game_vars)
 
+def plant_seed(farm, game_vars):
+    row, col = find_position(farm)
+    if farm[row][col][0] != '':
+        print("You are not allowed to plant a seed here.")
+    
+    else:
+        bag_items = list(game_vars['bag'].items()) # 
+        seed_choice = input("Which seed would you like to plant? ")
+        print("-----------------------------------------------------------------")
+        print(f"   {'Seed':<20}{'Days to Grow':^15}{'Crop Price':^15}{'Available':^15}")
+        for i in range(len(bag_items)):
+            print(f'{i+1}) {bag_items[i][0]:<20}{bag_items[i][1][0]:^15}{bag_items[i][1][1]:^15}{bag_items[i][1][2]:^15}')
+        print("-----------------------------------------------------------------")
+
+        # here onwards havent debug
+        if farm[row][col][0] == '' and farm[row][col][2] == '':
+            if game_vars['energy'] > 0:
+                if 'seed' in game_vars['bag'] and game_vars['bag']['seed'] > 0:
+                    farm[row][col][0] = 'S'
+                    game_vars['bag']['seed'] -= 1
+                    game_vars['energy'] -= 1
+                else:
+                    print("You don't have any seeds.")
+            else:
+                print("You are too tired. You should get back to town.")
+
 def in_farm():
     '''
     Handles the actions on the farm. Player starts at (2,2), at the
@@ -354,6 +382,8 @@ def in_farm():
             farm_choice = input("Your choice? ").upper()
             if farm_choice in ['W','A','S','D']:
                 move(farm, farm_choice, game_vars)
+            elif farm_choice == 'P':
+                plant_seed(farm, game_vars)
             elif farm_choice == 'R':
                 return False
             else:

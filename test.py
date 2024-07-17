@@ -123,6 +123,22 @@ def move(farm, farm_choice, game_vars):
     
     visit_farm(farm, game_vars)
 
+def plant_seed(farm, game_vars):
+    seed_choice = input("Which seed would you like to plant? ")
+    for seed in game_vars['bag']:
+        print(f'{seed}')
+    row, col = find_position(farm)
+    if farm[row][col][0] == '' and farm[row][col][2] == '':
+        if game_vars['energy'] > 0:
+            if 'seed' in game_vars['bag'] and game_vars['bag']['seed'] > 0:
+                farm[row][col][0] = 'S'
+                game_vars['bag']['seed'] -= 1
+                game_vars['energy'] -= 1
+            else:
+                print("You don't have any seeds.")
+        else:
+            print("You are too tired. You should get back to town.")
+
 def in_farm():
     visit_farm(farm,game_vars)
     while True:
@@ -130,6 +146,8 @@ def in_farm():
             farm_choice = input("Your choice? ").upper()
             if farm_choice in ['W','A','S','D']:
                 move(farm, farm_choice, game_vars)
+            elif farm_choice == 'P':
+                plant_seed(farm, game_vars)
             elif farm_choice == 'R':
                 return False
             else:
