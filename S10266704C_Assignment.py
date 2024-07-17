@@ -254,15 +254,6 @@ def visit_farm(farm, game_vars):
         print("[WASD] Move")
         print("R)eturn to Town")
 
-    while True:
-        try:
-            farm_options = input("Your choice? ").upper()
-            if farm_options in ['W','A','S','D','R']:
-                return farm_options
-            else:
-                print("Invalid choice. Please enter a valid choice.")
-        except ValueError:
-            print("Invalid input. Please enter a valid choice.")
 
 def find_position(farm):
     '''
@@ -279,7 +270,7 @@ def find_position(farm):
             if farm[row][col][1] == 'X':
                 return row, col
             
-def in_farm(farm, farm_choice, game_vars):
+def move(farm, farm_choice, game_vars):
     '''
     Handles the actions on the farm. Player starts at (2,2), at the
         farmhouse.
@@ -345,6 +336,21 @@ def in_farm(farm, farm_choice, game_vars):
     else:
         print("You are too tired. You should get back to town.")
 
+    visit_farm(farm, game_vars)
+
+def in_farm():
+    visit_farm(farm,game_vars)
+    while True:
+        try:
+            farm_choice = input("Your choice? ").upper()
+            if farm_choice in ['W','A','S','D']:
+                move(farm, farm_choice, game_vars)
+            elif farm_choice == 'R':
+                return False
+            else:
+                print("Invalid choice. Please enter a valid choice.")
+        except ValueError:
+            print("Invalid input. Please enter a valid choice.")
 
 #----------------------------------------------------------------------
 # show_stats(game_vars)
@@ -453,11 +459,8 @@ while True:
                         case "2":
                             # 2) Visit Farm
                             while True:
-                                farm_choice = visit_farm(farm,game_vars)
-                                if farm_choice == 'R':
+                                if not in_farm():
                                     break
-                                else:
-                                    in_farm(farm, farm_choice, game_vars)
                         case "3":
                             pass
                         case "9":

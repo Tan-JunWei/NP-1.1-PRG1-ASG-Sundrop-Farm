@@ -73,16 +73,6 @@ def visit_farm(farm, game_vars):
         print("[WASD] Move")
         print("R)eturn to Town")
 
-    while True:
-        try:
-            farm_options = input("Your choice? ").upper()
-            if farm_options in ['W','A','S','D','R']:
-                return farm_options
-            else:
-                print("Invalid choice. Please enter a valid choice.")
-        except ValueError:
-            print("Invalid input. Please enter a valid choice.")
-
 def find_position(farm):
     '''
     Finds the position of the player on the farm
@@ -98,7 +88,7 @@ def find_position(farm):
             if farm[row][col][1] == 'X':
                 return row, col
             
-def in_farm(farm, farm_choice, game_vars):
+def move(farm, farm_choice, game_vars):
     '''
     Move the player on the farm according to the player's choice
     Args:
@@ -130,8 +120,24 @@ def in_farm(farm, farm_choice, game_vars):
     # Instead, it prints the 'tired' message.
     else:
         print("You are too tired. You should get back to town.")
+    
+    visit_farm(farm, game_vars)
+
+def in_farm():
+    visit_farm(farm,game_vars)
+    while True:
+        try:
+            farm_choice = input("Your choice? ").upper()
+            if farm_choice in ['W','A','S','D']:
+                move(farm, farm_choice, game_vars)
+            elif farm_choice == 'R':
+                return False
+            else:
+                print("Invalid choice. Please enter a valid choice.")
+        except ValueError:
+            print("Invalid input. Please enter a valid choice.")
+
 
 while True:
-    farm_choice = visit_farm(farm,game_vars)
-    in_farm(farm, farm_choice, game_vars)
-
+    if not in_farm():
+        break
