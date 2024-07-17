@@ -157,7 +157,10 @@ def in_shop(game_vars,seeds,seed_list):
                         if seed_name in game_vars['bag']:
                             game_vars['bag'][seed_name][2] += purchase_quantity
                         else:
-                            game_vars['bag'][seed_name] = [seeds[seed_list[index]]['growth_time'], seeds[seed_list[index]]['crop_price'], purchase_quantity]
+                            game_vars['bag'][seed_name] = [seeds[seed_list[index]]['growth_time'], 
+                                                           seeds[seed_list[index]]['crop_price'], 
+                                                           purchase_quantity,
+                                                           seed_list[index]]
 
                         print(f"You bought {purchase_quantity} {seed_name} seeds.")
                         display_bag_contents(game_vars)
@@ -327,30 +330,34 @@ def move(farm, farm_choice, game_vars):
     visit_farm(farm, game_vars)
 
 def plant_seed(farm, game_vars):
+    bag_items = list(game_vars['bag'].items()) # Convert dictionary to list of tuples
+    # Example: [('Lettuce', [2, 3, 5, 'LET']), ('Potato', [3, 6, 1, 'POT']), ('Cauliflower', [6, 14, 1, 'CAU'])]
+
     row, col = find_position(farm)
-    if farm[row][col][0] != '':
-        print("You are not allowed to plant a seed here.")
     
-    else:
-        bag_items = list(game_vars['bag'].items()) # 
-        seed_choice = input("Which seed would you like to plant? ")
+    if farm[row][col][0] == '' and game_vars['energy'] > 0 and len(bag_items) > 0: # if empty and energy is more than 0 and bag has seeds
         print("-----------------------------------------------------------------")
         print(f"   {'Seed':<20}{'Days to Grow':^15}{'Crop Price':^15}{'Available':^15}")
         for i in range(len(bag_items)):
-            print(f'{i+1}) {bag_items[i][0]:<20}{bag_items[i][1][0]:^15}{bag_items[i][1][1]:^15}{bag_items[i][1][2]:^15}')
+            if bag_items[i][1][2] > 0:
+                print(f'{i+1}) {bag_items[i][0]:<20}{bag_items[i][1][0]:^15}{bag_items[i][1][1]:^15}{bag_items[i][1][2]:^15}')
         print("-----------------------------------------------------------------")
+        seed_choice = input("Which seed would you like to plant? ")
 
-        # here onwards havent debug
-        if farm[row][col][0] == '' and farm[row][col][2] == '':
-            if game_vars['energy'] > 0:
-                if 'seed' in game_vars['bag'] and game_vars['bag']['seed'] > 0:
-                    farm[row][col][0] = 'S'
-                    game_vars['bag']['seed'] -= 1
-                    game_vars['energy'] -= 1
-                else:
-                    print("You don't have any seeds.")
-            else:
-                print("You are too tired. You should get back to town.")
+        if seed_choice.isdigit() and 0 < int(seed_choice) <= len(bag_items):
+            seed_choice = int(seed_choice) - 1 
+            seed_to_plant = bag_items[seed_choice][0]
+            if game_vars['bag'][seed_to_plant][2] > 0:
+                farm[row][col][0] = game_vars['bag'][seed_to_plant][3]
+                farm[row][col][2] = str(game_vars['bag'][seed_to_plant][1])
+                game_vars['bag'][seed_to_plant][2] -= 1
+                game_vars['energy'] -= 1
+                visit_farm(farm, game_vars)
+        else:
+            print("You don't have any seeds.")
+
+    elif farm[row][col][0] != '': # if not empty
+        print("You are not allowed to plant a seed here.")
 
 def in_farm():
     '''
