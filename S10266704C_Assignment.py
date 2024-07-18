@@ -53,11 +53,7 @@ def in_town(game_vars):
         town_choice : Player's choice in Albatross Town
     '''
     while True: 
-        print("+-----------------------------------------------+")
-        print(f"| Day {game_vars['day']:<10} Energy: {game_vars["energy"]:<10} Money: ${game_vars["money"]}  |")
-        if game_vars['bag'] == {}:
-            print(f"| {'You have no seeds.':<45} |")
-        print("+-----------------------------------------------+")
+        show_stats(game_vars)
         print("You are in Albatross Town")
         print("-------------------------")
         print("1) Visit Shop\n"
@@ -76,17 +72,24 @@ def in_town(game_vars):
         except ValueError:
             print("Invalid input. Please enter a valid number (0,1,2,3,9).")
 
-def display_bag_contents(game_vars):
+def show_stats(game_vars):
     '''
-    Displays the contents of player's bag (Type and quantity of seeds)
+    Displays the following statistics:
+        - Day
+        - Energy
+        - Money
+        - Contents of Seed Bag
     Args:
         game_vars: A dictionary containing game variables('day','energy','money','bag')
     '''
     print("+-----------------------------------------------+")
     print(f"| Day {game_vars['day']:<10} Energy: {game_vars["energy"]:<10} Money: ${game_vars["money"]:<4}|")
-    print(f"{'| Your seeds:':<48}|")
-    for seed, statistics in game_vars['bag'].items():
-        print(f"|   {seed:<15}: {statistics[2]:>5}{'':22}|")
+    if game_vars['bag'] == {}:
+        print(f"| {"Your have no seeds.":46}|")
+    else:
+        print(f"{'| Your seeds:':<48}|")
+        for seed, statistics in game_vars['bag'].items():
+            print(f"|   {seed:<15}: {statistics[2]:>5}{'':22}|")
     print("+-----------------------------------------------+")
 
 def in_shop(game_vars,seeds,seed_list):
@@ -163,12 +166,12 @@ def in_shop(game_vars,seeds,seed_list):
                                                            seed_list[index]]
 
                         print(f"You bought {purchase_quantity} {seed_name} seeds.")
-                        display_bag_contents(game_vars)
+                        show_stats(game_vars)
                     
                     # insufficient money to purchase seeds
                     else:
                         print("You can't afford that!")
-                        display_bag_contents(game_vars)
+                        show_stats(game_vars)
 
                 except ValueError:
                     print("Please enter a valid quantity")
@@ -397,18 +400,6 @@ def in_farm():
                 print("Invalid choice. Please enter a valid choice.")
         except ValueError:
             print("Invalid input. Please enter a valid choice.")
-
-#----------------------------------------------------------------------
-# show_stats(game_vars)
-#
-#    Displays the following statistics:
-#      - Day
-#      - Energy
-#      - Money
-#      - Contents of Seed Bag
-#----------------------------------------------------------------------
-def show_stats(game_vars):
-    pass
 
 #----------------------------------------------------------------------
 # end_day(game_vars)
