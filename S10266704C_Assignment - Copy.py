@@ -34,7 +34,6 @@ farm = [ [['','',''], ['','',''], ['','',''], ['','',''], ['','','']],
          [['','',''], ['','',''], ['','',''], ['','',''], ['','','']],
          [['','',''], ['','',''], ['','',''], ['','',''], ['','','']] ]
 
-
 def in_town(game_vars):
     '''
     Displays the menu of Albatross Town and returns the player's choice
@@ -263,6 +262,20 @@ def find_position(farm):
             if farm[row][col][1] == 'X':
                 return row, col
             
+def reset_farm(farm):
+    '''
+    Resets the farm layout, moving the player back to the farmhouse
+    Farmhouse is at (2,2)
+    This function is called when player chooses to return to town
+    Args:
+        farm: A list of lists containing the farm layout
+    '''
+    for row in range(len(farm)):
+        for col in range(len(farm[0])):
+            if farm[row][col][1] == 'X':
+                farm[row][col][1] = ''
+                farm[2][2][1] = 'X'
+            
 def move(farm, farm_choice, game_vars):
     '''
     Handles the movement of player on the farm. Player starts at (2,2), at the
@@ -312,20 +325,6 @@ def move(farm, farm_choice, game_vars):
         print("You are too tired. You should get back to town.")
 
     visit_farm(farm, game_vars)
-
-def reset_farm(farm):
-    '''
-    Resets the farm layout, moving the player back to the farmhouse
-    Farmhouse is at (2,2)
-    This function is called when player chooses to return to town
-    Args:
-        farm: A list of lists containing the farm layout
-    '''
-    for row in range(len(farm)):
-        for col in range(len(farm[0])):
-            if farm[row][col][1] == 'X':
-                farm[row][col][1] = ''
-                farm[2][2][1] = 'X'
 
 def plant_seed(farm, game_vars):
     bag_items = list(game_vars['bag'].items()) # Convert dictionary to list of tuples
