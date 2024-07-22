@@ -342,20 +342,26 @@ def plant_seed(farm, game_vars):
         print("-----------------------------------------------------------------")
         seed_choice = input("Which seed would you like to plant? ")
 
-        if seed_choice.isdigit() and 0 < int(seed_choice) <= len(bag_items):
-            seed_choice = int(seed_choice) - 1 
+        if seed_choice.isdigit() and 0 < int(seed_choice) <= len(bag_items): # if input is a digit and within the range
+            seed_choice = int(seed_choice) - 1 # Convert to zero-based index
             seed_to_plant = bag_items[seed_choice][0]
-            if game_vars['bag'][seed_to_plant][2] > 0:
+            if game_vars['bag'][seed_to_plant][2] > 0: # if there are seeds available
                 farm[row][col][0] = game_vars['bag'][seed_to_plant][3]
                 farm[row][col][2] = str(game_vars['bag'][seed_to_plant][1])
                 game_vars['bag'][seed_to_plant][2] -= 1
                 game_vars['energy'] -= 1
                 visit_farm(farm, game_vars)
         else:
-            print("You don't have any seeds.")
+            print("You don't have that seed.")
 
     elif farm[row][col][0] != '': # if not empty
         print("You are not allowed to plant a seed here.")
+    
+    elif game_vars['energy'] == 0:
+        print("You are too tired. You should get back to town.")
+    
+    else:
+        print("You don't have any seeds.")
 
 def in_farm():
     '''
