@@ -237,17 +237,16 @@ def visit_farm(farm, game_vars):
     print(line_across)
 
     row_x, col_x = find_position(farm)
-    if farm[row_x][col_x][0] == '' and farm [row_x][col_x][2] == '':
-        print(f"Energy: {game_vars['energy']}")
-        print("[WASD] Move")
-        print("P)lant seed")
-        print("R)eturn to Town")
-    
-    else:
-        print(f"Energy: {game_vars['energy']}")
-        print("[WASD] Move")
-        print("R)eturn to Town")
+    row_x, col_x = find_position(farm)
+    print(f"Energy: {game_vars['energy']}")
+    print("[WASD] Move")
 
+    if farm[row_x][col_x][0] == '' and farm[row_x][col_x][2] == '':
+        print("P)lant seed")
+    elif farm[row_x][col_x][0] != '' and farm[row_x][col_x][2] == '0':
+        print(f"H)arvest {seeds[farm[row_x][col_x][0]]['name']} for ${seeds[farm[row_x][col_x][0]]['crop_price']}")
+
+    print("R)eturn to Town")
 
 def find_position(farm):
     '''
@@ -366,6 +365,23 @@ def plant_seed(farm, game_vars):
     else:
         print("You don't have any seeds.")
 
+def harvest_crop(farm, game_vars):
+    row, col = find_position(farm)
+
+    if farm[row][col][2] == "0": # check if crop is ready for harvest
+        game_vars['energy'] -= 1
+        game_vars['money'] += seeds[farm[row][col][0]]['crop_price']
+
+        print(f"You harvested the {seeds[farm[row][col][0]]['name'].capitalize()} and sold it for ${seeds[farm[row][col][0]]['crop_price']}!")
+        print(f"You now have ${game_vars['money']}!")
+
+        # empty square after harvest
+        farm[row][col][0], farm[row][col][2]= '', ''
+        visit_farm(farm, game_vars)
+
+    else:
+        print("You are unable to harvest!")
+
 def in_farm():
     '''
     Handles the actions on the farm. Player starts at (2,2), at the
@@ -398,6 +414,8 @@ def in_farm():
                 move(farm, farm_choice, game_vars)
             elif farm_choice == 'P':
                 plant_seed(farm, game_vars)
+            elif farm_choice == 'H':
+                harvest_crop(farm, game_vars)
             elif farm_choice == 'R':
                 reset_farm(farm) # Move player back to farmhouse if he chooses to return to town
                 return False
