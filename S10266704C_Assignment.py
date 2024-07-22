@@ -341,7 +341,7 @@ def define_bag_items(game_vars):
 
 def plant_seed(farm, game_vars):
     bag_items = define_bag_items(game_vars)
-
+    count = 1
     row, col = find_position(farm)
     
     if farm[row][col][0] == '' and game_vars['energy'] > 0 and len(bag_items) > 0: # if empty and energy is more than 0 and bag has seeds
@@ -349,13 +349,15 @@ def plant_seed(farm, game_vars):
         print(f"   {'Seed':<20}{'Days to Grow':^15}{'Crop Price':^15}{'Available':^15}")
         for i in range(len(bag_items)):
             if bag_items[i][1][2] > 0:
-                print(f'{i+1}) {bag_items[i][0]:<20}{bag_items[i][1][0]:^15}{bag_items[i][1][1]:^15}{bag_items[i][1][2]:^15}')
+                print(f'{count}) {bag_items[i][0]:<20}{bag_items[i][1][0]:^15}{bag_items[i][1][1]:^15}{bag_items[i][1][2]:^15}')
+                count += 1
         print("-----------------------------------------------------------------")
         seed_choice = input("Which seed would you like to plant? ")
 
         if seed_choice.isdigit() and 0 < int(seed_choice) <= len(bag_items): # if input is a digit and within the range
             seed_choice = int(seed_choice) - 1 # Convert to zero-based index
             seed_to_plant = bag_items[seed_choice][0]
+
             if game_vars['bag'][seed_to_plant][2] > 0: # if there are seeds available
                 farm[row][col][0] = game_vars['bag'][seed_to_plant][3]
                 farm[row][col][2] = str(game_vars['bag'][seed_to_plant][1])
