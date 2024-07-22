@@ -327,9 +327,20 @@ def reset_farm(farm):
                 farm[row][col][1] = ''
                 farm[2][2][1] = 'X'
 
-def plant_seed(farm, game_vars):
-    bag_items = list(game_vars['bag'].items()) # Convert dictionary to list of tuples
+def define_bag_items(game_vars):
+    '''
+    Returns the items in the bag.
+    This is made into a function as it only makes bag items if there are seeds in the bag.
+    Args:
+        game_vars: A dictionary containing game variables('day','energy','money','bag')
+    Returns:
+        bag_items: A list of tuples containing the items in the bag
+    '''
     # Example: [('Lettuce', [2, 3, 5, 'LET']), ('Potato', [3, 6, 1, 'POT']), ('Cauliflower', [6, 14, 1, 'CAU'])]
+    return list(game_vars['bag'].items())
+
+def plant_seed(farm, game_vars):
+    bag_items = define_bag_items(game_vars)
 
     row, col = find_position(farm)
     
@@ -403,17 +414,26 @@ def in_farm():
         except ValueError:
             print("Invalid input. Please enter a valid choice.")
 
-#----------------------------------------------------------------------
-# end_day(game_vars)
-#
-#    Ends the day
-#      - The day number increases by 1
-#      - Energy is reset to 10
-#      - Every planted crop has their growth time reduced by 1, to a
-#        minimum of 0
-#----------------------------------------------------------------------
 def end_day(game_vars):
-    pass
+    '''
+    Ends the day
+    - The day number increases by 1
+    - Energy is reset to 10
+    - Every planted crop has their growth time reduced by 1, to a
+    minimum of 0
+    Args:
+        game_vars: A dictionary containing game variables('day','energy','money','bag')
+    
+    Example: [('Lettuce', [2, 3, 5, 'LET']), ('Potato', [3, 6, 1, 'POT']), ('Cauliflower', [6, 14, 1, 'CAU'])]
+    '''
+
+    game_vars['day'] += 1
+    game_vars['energy'] = 10
+
+    bag_items = define_bag_items(game_vars)
+    for item in bag_items:
+        if item[1][1] > 0:
+            item[1][1] -= 1
 
 
 #----------------------------------------------------------------------
@@ -501,7 +521,8 @@ while True:
                                 if not in_farm():
                                     break
                         case "3":
-                            pass
+                            # 3) End Day
+                            end_day(game_vars)
                         case "9":
                             pass
                         case "0":
