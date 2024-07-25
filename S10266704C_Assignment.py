@@ -38,6 +38,8 @@ farm = [ [['','',''], ['','',''], ['','',''], ['','',''], ['','','']],
          [['','',''], ['','',''], ['','',''], ['','',''], ['','','']],
          [['','',''], ['','',''], ['','',''], ['','',''], ['','','']] ]
 
+break_all = False
+
 def display_main_menu():
     """
     Display the main menu for Sundrop Farm game.
@@ -64,7 +66,7 @@ def display_main_menu():
     print("Welcome to Sundrop Farm!")
     print()
     print("You took out a loan to buy a small farm in Albatross Town.")
-    print("You have 30 days to pay off your debt of $100.")
+    print("You have 20 days to pay off your debt of $100.")
     print("You might even be able to make a little profit.")
     print("How successful will you be?")
     print("----------------------------------------------------------")
@@ -72,7 +74,7 @@ def display_main_menu():
           "2) Load your saved game\n"
           "\n"
           "0) Exit Game")
-
+    
 def in_town(game_vars):
     '''
     Displays the menu of Albatross Town and returns the player's choice
@@ -109,6 +111,41 @@ def in_town(game_vars):
                 print("Invalid choice. Please enter a valid choice.")
         except ValueError:
             print("Invalid input. Please enter a valid number (0,1,2,3,9).")
+
+def game(game_vars, farm):
+    '''
+    Main game loop for Sundrop Farm
+    Args: 
+        game_vars: A dictionary containing game variables('day','energy','money','bag')
+        farm: A list of lists containing the farm layout
+    '''
+    while True: 
+        # 1) Start a new game
+        town_choice = in_town(game_vars)
+
+        match town_choice:
+
+            case "1":
+                # 1) Visit Shop
+                in_shop(game_vars,seeds,seed_list)
+
+            case "2":
+                # 2) Visit Farm
+                while True:
+                    if not in_farm():
+                        break
+            case "3":
+                # 3) End Day
+                break_game = end_day(game_vars)
+                if break_game:
+                    break_all = True
+                    break
+            case "9":
+                save_game(game_vars, farm)
+            case "0":
+                break
+            case _:
+                print("Invalid choice. Please enter a valid option (0,1,2,3,9).")
 
 def show_stats(game_vars):
     '''
@@ -471,6 +508,17 @@ def end_day(game_vars):
     Args:
         game_vars: A dictionary containing game variables('day','energy','money','bag')
     '''
+    break_game = False
+
+    if game_vars['day'] == 20:
+        print(f"You have ${game_vars['money']} after 20 days.")
+        break_game = True
+        if game_vars['money'] >= 100:
+            print(f"You paid off your debt of $100 and made a profit of ${game_vars['money'] - 100}.")
+            print("You win!")
+        else: 
+            print("You have run out of time to pay off your debt. You lose.")
+
     game_vars['day'] += 1
     game_vars['energy'] = 10
 
@@ -479,6 +527,8 @@ def end_day(game_vars):
         for col in range(len(farm[0])):
             if farm[row][col][2] != '': 
                 farm[row][col][2] = str(max(0, int(farm[row][col][2]) - 1)) # max returns the maximum of two values
+    
+    return break_game
 
 def save_game(game_vars, farm):
     '''
@@ -517,6 +567,7 @@ def load_game(game_vars, farm):
 #----------------------------------------------------------------------
 
 while True:
+    print(break_all)
     display_main_menu()
     try:
         option = input("Your choice? ")
@@ -528,35 +579,11 @@ while True:
                 break
 
             case "1":
-
-                while True: 
-                    # 1) Start a new game
-                    town_choice = in_town(game_vars)
-
-                    match town_choice:
-
-                        case "1":
-                            # 1) Visit Shop
-                            in_shop(game_vars,seeds,seed_list)
-
-                        case "2":
-                            # 2) Visit Farm
-                            while True:
-                                if not in_farm():
-                                    break
-                        case "3":
-                            # 3) End Day
-                            end_day(game_vars)
-                        case "9":
-                            save_game(game_vars, farm)
-                        case "0":
-                            break
-                        case _:
-                            print("Invalid choice. Please enter a valid option (0,1,2,3,9).")
+                game(game_vars,farm)
 
             case "2":
                 load_game(game_vars,farm)
-                town_choice = in_town(game_vars)
+                game(game_vars,farm)
             case _:
                 # Integer input but not 1, 2 or 0
                 print("Invalid choice. Please enter a valid option (0,1,2).")
