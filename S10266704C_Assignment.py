@@ -3,7 +3,11 @@ game_vars = {
     'day': 1,
     'energy': 10,
     'money': 20,
-    'bag': {},
+    'bag': {
+        'Lettuce' : [2, 3, 0, 'LET'],
+        'Potato' : [3, 6, 0, 'POT'],
+        'Cauliflower' : [6, 14, 0, 'CAU']
+    },
 }
 
 seed_list = ['LET', 'POT', 'CAU']
@@ -34,6 +38,40 @@ farm = [ [['','',''], ['','',''], ['','',''], ['','',''], ['','','']],
          [['','',''], ['','',''], ['','',''], ['','',''], ['','','']],
          [['','',''], ['','',''], ['','',''], ['','',''], ['','','']] ]
 
+def display_main_menu():
+    """
+    Display the main menu for Sundrop Farm game.
+
+    Displays a welcome message and menu options for starting a new game, loading a saved game,
+    or exiting the game.
+
+    Example:
+    ----------------------------------------------------------
+    Welcome to Sundrop Farm!
+
+    You took out a loan to buy a small farm in Albatross Town.
+    You have 30 days to pay off your debt of $100.
+    You might even be able to make a little profit.
+    How successful will you be?
+    ----------------------------------------------------------
+    1) Start a new game
+    2) Load your saved game
+
+    0) Exit Game
+    """
+
+    print("----------------------------------------------------------")
+    print("Welcome to Sundrop Farm!")
+    print()
+    print("You took out a loan to buy a small farm in Albatross Town.")
+    print("You have 30 days to pay off your debt of $100.")
+    print("You might even be able to make a little profit.")
+    print("How successful will you be?")
+    print("----------------------------------------------------------")
+    print("1) Start a new game\n"
+          "2) Load your saved game\n"
+          "\n"
+          "0) Exit Game")
 
 def in_town(game_vars):
     '''
@@ -442,62 +480,42 @@ def end_day(game_vars):
             if farm[row][col][2] != '': 
                 farm[row][col][2] = str(max(0, int(farm[row][col][2]) - 1)) # max returns the maximum of two values
 
-#----------------------------------------------------------------------
-# save_game(game_vars, farm)
-#
-#    Saves the game into the file "savegame.txt"
-#----------------------------------------------------------------------
 def save_game(game_vars, farm):
-    pass
+    '''
+    Saves the game into the file "savegame.txt"
+    Args: 
+        game_vars: A dictionary containing game variables('day','energy','money','bag')
+        farm: A list of lists containing the farm layout
+    '''
+    with open("savegame.txt", "w") as file:
+        file.write(f"{game_vars['day']}\n{game_vars['energy']}\n{game_vars['money']}\n") # first 3 lines: day, energy, money
+        # next 3 lines: Lettuce, Potato, Cauliflower
+        file.write(f"{game_vars['bag']['Lettuce'][2]}\n{game_vars['bag']['Potato'][2]}\n{game_vars['bag']['Cauliflower'][2]}\n") 
 
-#----------------------------------------------------------------------
-# load_game(game_vars, farm)
-#
-#    Loads the saved game by reading the file "savegame.txt"
-#----------------------------------------------------------------------
+        for row in range(len(farm)):
+            for col in range(len(farm[row])):
+                file.write(f"{row},{col},{farm[row][col][0]}:{farm[row][col][1]}:{farm[row][col][2]}\n")
+
 def load_game(game_vars, farm):
-    pass
+    '''
+    load_game(game_vars, farm)
+    
+    Loads the saved game by reading the file "savegame.txt"
+    '''
+    with open("savegame.txt", "r") as file:
+        lines = file.readlines()
+        game_vars['day'] = int(lines[0].strip())
+        game_vars['energy'] = int(lines[1].strip())
+        game_vars['money'] = int(lines[2].strip())
+        game_vars['bag']['Lettuce'][2] = int(lines[3].strip())
+        game_vars['bag']['Potato'][2] = int(lines[4].strip())
+        game_vars['bag']['Cauliflower'][2] = int(lines[5].strip())
+        print("Game saved.")
 
 #----------------------------------------------------------------------
 #    Main Game Loop
 #----------------------------------------------------------------------
 
-def display_main_menu():
-    """
-    Display the main menu for Sundrop Farm game.
-
-    Displays a welcome message and menu options for starting a new game, loading a saved game,
-    or exiting the game.
-
-    Example:
-    ----------------------------------------------------------
-    Welcome to Sundrop Farm!
-
-    You took out a loan to buy a small farm in Albatross Town.
-    You have 30 days to pay off your debt of $100.
-    You might even be able to make a little profit.
-    How successful will you be?
-    ----------------------------------------------------------
-    1) Start a new game
-    2) Load your saved game
-
-    0) Exit Game
-    """
-
-    print("----------------------------------------------------------")
-    print("Welcome to Sundrop Farm!")
-    print()
-    print("You took out a loan to buy a small farm in Albatross Town.")
-    print("You have 30 days to pay off your debt of $100.")
-    print("You might even be able to make a little profit.")
-    print("How successful will you be?")
-    print("----------------------------------------------------------")
-    print("1) Start a new game\n"
-          "2) Load your saved game\n"
-          "\n"
-          "0) Exit Game")
-
-# Write your main game loop here
 while True:
     display_main_menu()
     try:
@@ -530,16 +548,15 @@ while True:
                             # 3) End Day
                             end_day(game_vars)
                         case "9":
-                            pass
+                            save_game(game_vars, farm)
                         case "0":
                             break
                         case _:
                             print("Invalid choice. Please enter a valid option (0,1,2,3,9).")
 
             case "2":
-                # 2) Load your saved game
-                pass
-                
+                load_game(game_vars,farm)
+                town_choice = in_town(game_vars)
             case _:
                 # Integer input but not 1, 2 or 0
                 print("Invalid choice. Please enter a valid option (0,1,2).")
