@@ -3,7 +3,11 @@ game_vars = {
     'day': 1,
     'energy': 10,
     'money': 20,
-    'bag': {},
+    'bag': {
+        'Lettuce' : [2, 3, 0, 'LET'],
+        'Potato' : [3, 6, 0, 'POT'],
+        'Cauliflower' : [6, 14, 0, 'CAU']
+    },
 }
 
 seed_list = ['LET', 'POT', 'CAU']
@@ -34,6 +38,43 @@ farm = [ [['','',''], ['','',''], ['','',''], ['','',''], ['','','']],
          [['','',''], ['','',''], ['','',''], ['','',''], ['','','']],
          [['','',''], ['','',''], ['','',''], ['','',''], ['','','']] ]
 
+break_all = False
+
+def display_main_menu():
+    """
+    Display the main menu for Sundrop Farm game.
+
+    Displays a welcome message and menu options for starting a new game, loading a saved game,
+    or exiting the game.
+
+    Example:
+    ----------------------------------------------------------
+    Welcome to Sundrop Farm!
+
+    You took out a loan to buy a small farm in Albatross Town.
+    You have 30 days to pay off your debt of $100.
+    You might even be able to make a little profit.
+    How successful will you be?
+    ----------------------------------------------------------
+    1) Start a new game
+    2) Load your saved game
+
+    0) Exit Game
+    """
+
+    print("----------------------------------------------------------")
+    print("Welcome to Sundrop Farm!")
+    print()
+    print("You took out a loan to buy a small farm in Albatross Town.")
+    print("You have 20 days to pay off your debt of $100.")
+    print("You might even be able to make a little profit.")
+    print("How successful will you be?")
+    print("----------------------------------------------------------")
+    print("1) Start a new game\n"
+          "2) Load your saved game\n"
+          "\n"
+          "0) Exit Game")
+    
 def in_town(game_vars):
     '''
     Displays the menu of Albatross Town and returns the player's choice
@@ -71,6 +112,41 @@ def in_town(game_vars):
         except ValueError:
             print("Invalid input. Please enter a valid number (0,1,2,3,9).")
 
+def game(game_vars, farm):
+    '''
+    Main game loop for Sundrop Farm
+    Args: 
+        game_vars: A dictionary containing game variables('day','energy','money','bag')
+        farm: A list of lists containing the farm layout
+    '''
+    while True: 
+        # 1) Start a new game
+        town_choice = in_town(game_vars)
+
+        match town_choice:
+
+            case "1":
+                # 1) Visit Shop
+                in_shop(game_vars,seeds,seed_list)
+
+            case "2":
+                # 2) Visit Farm
+                while True:
+                    if not in_farm():
+                        break
+            case "3":
+                # 3) End Day
+                break_game = end_day(game_vars)
+                if break_game:
+                    break_all = True
+                    break
+            case "9":
+                save_game(game_vars, farm)
+            case "0":
+                break
+            case _:
+                print("Invalid choice. Please enter a valid option (0,1,2,3,9).")
+
 def show_stats(game_vars):
     '''
     Displays the following statistics:
@@ -88,7 +164,8 @@ def show_stats(game_vars):
     else:
         print(f"{'| Your seeds:':<48}|")
         for seed, statistics in game_vars['bag'].items():
-            print(f"|   {seed:<15}: {statistics[2]:>5}{'':22}|")
+            if statistics[2] > 0:
+                print(f"|   {seed:<15}: {statistics[2]:>5}{'':22}|")
     print("+-----------------------------------------------+")
 
 def in_shop(game_vars,seeds,seed_list):
@@ -235,17 +312,16 @@ def visit_farm(farm, game_vars):
     print(line_across)
 
     row_x, col_x = find_position(farm)
-    if farm[row_x][col_x][0] == '' and farm [row_x][col_x][2] == '':
-        print(f"Energy: {game_vars['energy']}")
-        print("[WASD] Move")
-        print("P)lant seed")
-        print("R)eturn to Town")
-    
-    else:
-        print(f"Energy: {game_vars['energy']}")
-        print("[WASD] Move")
-        print("R)eturn to Town")
+    row_x, col_x = find_position(farm)
+    print(f"Energy: {game_vars['energy']}")
+    print("[WASD] Move")
 
+    if farm[row_x][col_x][0] == '' and farm[row_x][col_x][2] == '':
+        print("P)lant seed")
+    elif farm[row_x][col_x][0] != '' and farm[row_x][col_x][2] == '0':
+        print(f"H)arvest {seeds[farm[row_x][col_x][0]]['name']} for ${seeds[farm[row_x][col_x][0]]['crop_price']}")
+
+    print("R)eturn to Town")
 
 def find_position(farm):
     '''
@@ -261,20 +337,6 @@ def find_position(farm):
         for col in range(len(farm[0])):
             if farm[row][col][1] == 'X':
                 return row, col
-            
-def reset_farm(farm):
-    '''
-    Resets the farm layout, moving the player back to the farmhouse
-    Farmhouse is at (2,2)
-    This function is called when player chooses to return to town
-    Args:
-        farm: A list of lists containing the farm layout
-    '''
-    for row in range(len(farm)):
-        for col in range(len(farm[0])):
-            if farm[row][col][1] == 'X':
-                farm[row][col][1] = ''
-                farm[2][2][1] = 'X'
             
 def move(farm, farm_choice, game_vars):
     '''
@@ -326,35 +388,73 @@ def move(farm, farm_choice, game_vars):
 
     visit_farm(farm, game_vars)
 
-def plant_seed(farm, game_vars):
-    bag_items = list(game_vars['bag'].items()) # Convert dictionary to list of tuples
-    # Example: [('Lettuce', [2, 3, 5, 'LET']), ('Potato', [3, 6, 1, 'POT']), ('Cauliflower', [6, 14, 1, 'CAU'])]
+def reset_farm(farm):
+    '''
+    Resets the farm layout, moving the player back to the farmhouse
+    Farmhouse is at (2,2)
+    This function is called when player chooses to return to town
+    Args:
+        farm: A list of lists containing the farm layout
+    '''
+    for row in range(len(farm)):
+        for col in range(len(farm[0])):
+            if farm[row][col][1] == 'X':
+                farm[row][col][1] = ''
+                farm[2][2][1] = 'X'
 
+def plant_seed(farm, game_vars):
+    count = 1
+    available_seeds = []
     row, col = find_position(farm)
     
-    if farm[row][col][0] == '' and game_vars['energy'] > 0 and len(bag_items) > 0: # if empty and energy is more than 0 and bag has seeds
+    if farm[row][col][0] == '' and game_vars['energy'] > 0 and len(game_vars['bag']) > 0: # if empty and energy is more than 0 and bag has seeds
         print("-----------------------------------------------------------------")
         print(f"   {'Seed':<20}{'Days to Grow':^15}{'Crop Price':^15}{'Available':^15}")
-        for i in range(len(bag_items)):
-            if bag_items[i][1][2] > 0:
-                print(f'{i+1}) {bag_items[i][0]:<20}{bag_items[i][1][0]:^15}{bag_items[i][1][1]:^15}{bag_items[i][1][2]:^15}')
+        for seed_name, seed_info in game_vars['bag'].items():
+            if seed_info[2] > 0:  # if seeds available
+                print(f'{count}) {seed_name:<20}{seed_info[0]:^15}{seed_info[1]:^15}{seed_info[2]:^15}')
+                available_seeds.append(seed_name)
+                count += 1
         print("-----------------------------------------------------------------")
         seed_choice = input("Which seed would you like to plant? ")
 
-        if seed_choice.isdigit() and 0 < int(seed_choice) <= len(bag_items):
-            seed_choice = int(seed_choice) - 1 
-            seed_to_plant = bag_items[seed_choice][0]
-            if game_vars['bag'][seed_to_plant][2] > 0:
+        if seed_choice.isdigit() and 0 < int(seed_choice) <= len(available_seeds): # check if input is a digit and within the range
+            seed_to_plant = available_seeds[int(seed_choice) - 1]  # convert to zero-based index
+
+            if game_vars['bag'][seed_to_plant][2] > 0: # if there are seeds available
                 farm[row][col][0] = game_vars['bag'][seed_to_plant][3]
                 farm[row][col][2] = str(game_vars['bag'][seed_to_plant][1])
                 game_vars['bag'][seed_to_plant][2] -= 1
                 game_vars['energy'] -= 1
                 visit_farm(farm, game_vars)
         else:
-            print("You don't have any seeds.")
+            print("You don't have that seed.") # if input is not a digit
 
     elif farm[row][col][0] != '': # if not empty
         print("You are not allowed to plant a seed here.")
+    
+    elif game_vars['energy'] == 0:
+        print("You are too tired. You should get back to town.")
+    
+    else:
+        print("You don't have any seeds.")
+
+def harvest_crop(farm, game_vars):
+    row, col = find_position(farm)
+
+    if farm[row][col][2] == "0": # check if crop is ready for harvest
+        game_vars['energy'] -= 1
+        game_vars['money'] += seeds[farm[row][col][0]]['crop_price']
+
+        print(f"You harvested the {seeds[farm[row][col][0]]['name'].capitalize()} and sold it for ${seeds[farm[row][col][0]]['crop_price']}!")
+        print(f"You now have ${game_vars['money']}!")
+
+        # empty square after harvest
+        farm[row][col][0], farm[row][col][2]= '', ''
+        visit_farm(farm, game_vars)
+
+    else:
+        print("You are unable to harvest!")
 
 def in_farm():
     '''
@@ -388,6 +488,8 @@ def in_farm():
                 move(farm, farm_choice, game_vars)
             elif farm_choice == 'P':
                 plant_seed(farm, game_vars)
+            elif farm_choice == 'H':
+                harvest_crop(farm, game_vars)
             elif farm_choice == 'R':
                 reset_farm(farm) # Move player back to farmhouse if he chooses to return to town
                 return False
@@ -396,76 +498,75 @@ def in_farm():
         except ValueError:
             print("Invalid input. Please enter a valid choice.")
 
-#----------------------------------------------------------------------
-# end_day(game_vars)
-#
-#    Ends the day
-#      - The day number increases by 1
-#      - Energy is reset to 10
-#      - Every planted crop has their growth time reduced by 1, to a
-#        minimum of 0
-#----------------------------------------------------------------------
 def end_day(game_vars):
-    pass
+    '''
+    Ends the day
+    - The day number increases by 1
+    - Energy is reset to 10
+    - Every planted crop has their growth time reduced by 1, to a minimum of 0
+    Args:
+        game_vars: A dictionary containing game variables('day','energy','money','bag')
+    '''
+    break_game = False
 
+    if game_vars['day'] == 20:
+        print(f"You have ${game_vars['money']} after 20 days.")
+        break_game = True
+        if game_vars['money'] >= 100:
+            print(f"You paid off your debt of $100 and made a profit of ${game_vars['money'] - 100}.")
+            print("You win!")
+        else: 
+            print("You have run out of time to pay off your debt. You lose.")
 
-#----------------------------------------------------------------------
-# save_game(game_vars, farm)
-#
-#    Saves the game into the file "savegame.txt"
-#----------------------------------------------------------------------
+    game_vars['day'] += 1
+    game_vars['energy'] = 10
+
+    # Reduce growth time of crops by 1
+    for row in range(len(farm)):
+        for col in range(len(farm[0])):
+            if farm[row][col][2] != '': 
+                farm[row][col][2] = str(max(0, int(farm[row][col][2]) - 1)) # max returns the maximum of two values
+    
+    return break_game
+
 def save_game(game_vars, farm):
-    pass
+    '''
+    Saves the game into the file "savegame.txt"
+    Args: 
+        game_vars: A dictionary containing game variables('day','energy','money','bag')
+        farm: A list of lists containing the farm layout
+    '''
+    with open("savegame.txt", "w") as file:
+        file.write(f"{game_vars['day']}\n{game_vars['energy']}\n{game_vars['money']}\n") # first 3 lines: day, energy, money
+        # next 3 lines: Lettuce, Potato, Cauliflower
+        file.write(f"{game_vars['bag']['Lettuce'][2]}\n{game_vars['bag']['Potato'][2]}\n{game_vars['bag']['Cauliflower'][2]}\n") 
 
-#----------------------------------------------------------------------
-# load_game(game_vars, farm)
-#
-#    Loads the saved game by reading the file "savegame.txt"
-#----------------------------------------------------------------------
+        for row in range(len(farm)):
+            for col in range(len(farm[row])):
+                file.write(f"{row},{col},{farm[row][col][0]}:{farm[row][col][1]}:{farm[row][col][2]}\n")
+
 def load_game(game_vars, farm):
-    pass
+    '''
+    load_game(game_vars, farm)
+    
+    Loads the saved game by reading the file "savegame.txt"
+    '''
+    with open("savegame.txt", "r") as file:
+        lines = file.readlines()
+        game_vars['day'] = int(lines[0].strip())
+        game_vars['energy'] = int(lines[1].strip())
+        game_vars['money'] = int(lines[2].strip())
+        game_vars['bag']['Lettuce'][2] = int(lines[3].strip())
+        game_vars['bag']['Potato'][2] = int(lines[4].strip())
+        game_vars['bag']['Cauliflower'][2] = int(lines[5].strip())
+        print("Game saved.")
 
 #----------------------------------------------------------------------
 #    Main Game Loop
 #----------------------------------------------------------------------
 
-def display_main_menu():
-    """
-    Display the main menu for Sundrop Farm game.
-
-    Displays a welcome message and menu options for starting a new game, loading a saved game,
-    or exiting the game.
-
-    Example:
-    ----------------------------------------------------------
-    Welcome to Sundrop Farm!
-
-    You took out a loan to buy a small farm in Albatross Town.
-    You have 30 days to pay off your debt of $100.
-    You might even be able to make a little profit.
-    How successful will you be?
-    ----------------------------------------------------------
-    1) Start a new game
-    2) Load your saved game
-
-    0) Exit Game
-    """
-
-    print("----------------------------------------------------------")
-    print("Welcome to Sundrop Farm!")
-    print()
-    print("You took out a loan to buy a small farm in Albatross Town.")
-    print("You have 30 days to pay off your debt of $100.")
-    print("You might even be able to make a little profit.")
-    print("How successful will you be?")
-    print("----------------------------------------------------------")
-    print("1) Start a new game\n"
-          "2) Load your saved game\n"
-          "\n"
-          "0) Exit Game")
-
-# Write your main game loop here
 while True:
+    print(break_all)
     display_main_menu()
     try:
         option = input("Your choice? ")
@@ -477,35 +578,11 @@ while True:
                 break
 
             case "1":
-
-                while True: 
-                    # 1) Start a new game
-                    town_choice = in_town(game_vars)
-
-                    match town_choice:
-
-                        case "1":
-                            # 1) Visit Shop
-                            in_shop(game_vars,seeds,seed_list)
-
-                        case "2":
-                            # 2) Visit Farm
-                            while True:
-                                if not in_farm():
-                                    break
-                        case "3":
-                            pass
-                        case "9":
-                            pass
-                        case "0":
-                            break
-                        case _:
-                            print("Invalid choice. Please enter a valid option (0,1,2,3,9).")
+                game(game_vars,farm)
 
             case "2":
-                # 2) Load your saved game
-                pass
-                
+                load_game(game_vars,farm)
+                game(game_vars,farm)
             case _:
                 # Integer input but not 1, 2 or 0
                 print("Invalid choice. Please enter a valid option (0,1,2).")
