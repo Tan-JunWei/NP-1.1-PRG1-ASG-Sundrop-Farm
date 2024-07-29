@@ -146,7 +146,6 @@ def game(game_vars, farm):
                 print("Invalid choice. Please enter a valid option (0,1,2,3,9).")
 
 def show_stats(game_vars):
-    # FIXED
     '''
     Displays the following statistics:
         - Day
@@ -168,11 +167,14 @@ def show_stats(game_vars):
     print("+-----------------------------------------------+")
 
 def in_shop(game_vars,seeds,seed_list):
-    # FIXED
     '''
     Displays the menu of the seed shop, and allows players to buy seeds
-    Seeds can be bought if player has enough money
+
+    [Additional Feature added: Limited Capacity for Seed Bag (5 marks)]
+    Seeds can be bought if player has enough money and bag has enough space (max 10 seeds)
+
     Ends when player selects to leave the shop
+
     Players can:
         1) Buy Lettuce seeds
         2) Buy Potato seeds
@@ -218,7 +220,7 @@ def in_shop(game_vars,seeds,seed_list):
                         continue
 
                     # Buying seeds with sufficient money
-                    if total_cost <= game_vars['money']:
+                    if total_cost <= game_vars['money'] and sum(game_vars['bag'].values()) + purchase_quantity <= 10: # Additional feature: Limited Capacity for Seed Bag (5 marks)
                         game_vars['money'] -= total_cost
 
                         # Convert purchase_choice number into index of seed_list, and use the seed name as key
@@ -232,9 +234,13 @@ def in_shop(game_vars,seeds,seed_list):
 
                         print(f"You bought {purchase_quantity} {seed_name} seeds.")
                         show_stats(game_vars)
-                    
-                    # insufficient money to purchase seeds
-                    else:
+
+                    elif sum(game_vars['bag'].values()) + purchase_quantity > 10:
+                        # Additional feature: Limited Capacity for Seed Bag (5 marks)
+                        print("You can't carry more than 10 seeds!")
+                        show_stats(game_vars)
+
+                    elif total_cost > game_vars['money']: # insufficient money to purchase seeds
                         print("You can't afford that!")
                         show_stats(game_vars)
 
@@ -585,6 +591,7 @@ while True:
 
             case "0":
                 # 0) Exit Game
+                print("Goodbye!")
                 break
 
             case "1":
