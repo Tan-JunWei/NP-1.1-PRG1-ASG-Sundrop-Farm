@@ -566,24 +566,29 @@ def save_game(game_vars, farm):
 
 def load_game(game_vars, farm):
     '''
-    load_game(game_vars, farm)
-    
     Loads the saved game by reading the file "savegame.txt"
+    if the file is not found, prints "No saved game found." (FileNotFoundError)
+    Args:
+        game_vars: A dictionary containing game variables('day','energy','money','bag')
+        farm: A list of lists containing the farm layout
     '''
-    with open("savegame.txt", "r") as file:
-        lines = file.readlines()
-        game_vars['day'] = int(lines[0].strip())
-        game_vars['energy'] = int(lines[1].strip())
-        game_vars['money'] = int(lines[2].strip())
-        game_vars['bag']['Lettuce'] = int(lines[3].strip())
-        game_vars['bag']['Potato'] = int(lines[4].strip())
-        game_vars['bag']['Cauliflower'] = int(lines[5].strip())
-        
-        for line in lines[6:]:
-            farm_load_list = line.strip().split(",")
-            farm_load_list = [int(farm_load_list[0]), int(farm_load_list[1]), farm_load_list[2].split(":")]
-            farm[farm_load_list[0]][farm_load_list[1]] = farm_load_list[2]
-        print("Game saved.")
+    try:
+        with open("savegame.txt", "r") as file:
+            lines = file.readlines()
+            game_vars['day'] = int(lines[0].strip())
+            game_vars['energy'] = int(lines[1].strip())
+            game_vars['money'] = int(lines[2].strip())
+            game_vars['bag']['Lettuce'] = int(lines[3].strip())
+            game_vars['bag']['Potato'] = int(lines[4].strip())
+            game_vars['bag']['Cauliflower'] = int(lines[5].strip())
+
+            for line in lines[6:]:
+                farm_load_list = line.strip().split(",")
+                farm_load_list = [int(farm_load_list[0]), int(farm_load_list[1]), farm_load_list[2].split(":")]
+                farm[farm_load_list[0]][farm_load_list[1]] = farm_load_list[2]
+            print("Game saved.")
+    except FileNotFoundError:
+        print("No saved game found.")
 
 #----------------------------------------------------------------------
 #    Main Game Loop
