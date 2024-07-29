@@ -1,4 +1,5 @@
 import random
+import sys
 
 # Game variables
 game_vars = {
@@ -144,6 +145,7 @@ def game(game_vars, farm):
                 break
             case "0":
                 break
+                # sys.exit()
             case _:
                 print("Invalid choice. Please enter a valid option (0,1,2,3,9).")
 
@@ -221,17 +223,15 @@ def in_shop(game_vars,seeds,seed_list):
                         print("Please enter a valid quantity") # Error message if purchase_quantity is not positive integer
                         continue
 
-                    # Buying seeds with sufficient money
                     if total_cost <= game_vars['money'] and sum(game_vars['bag'].values()) + purchase_quantity <= 10: # Additional feature: Limited Capacity for Seed Bag (5 marks)
                         game_vars['money'] -= total_cost
 
                         # Convert purchase_choice number into index of seed_list, and use the seed name as key
                         # to access seeds dictionary.
                         index = int(purchase_choice)-1 
-                        seed_name = seeds[seed_list[index]]['name'] # seed_list = ['LET', 'POT', 'CAU']
+                        seed_name = seeds[seed_list[index]]['name']
                         # seed name can be "Lettuce", "Potato", "Cauliflower"
 
-                        # Update dictionary accordingly
                         game_vars['bag'][seed_name] += purchase_quantity
 
                         print(f"You bought {purchase_quantity} {seed_name} seeds.")
@@ -318,6 +318,48 @@ def visit_farm(farm, game_vars):
         print(f"H)arvest {seeds[farm[row_x][col_x][0]]['name']} for ${seeds[farm[row_x][col_x][0]]['crop_price']}")
 
     print("R)eturn to Town")
+
+def in_farm():
+    '''
+    Handles the actions on the farm. Player starts at (2,2), at the
+    farmhouse.
+
+    Possible actions:
+    W, A, S, D - Moves the player
+        - Will show error message if attempting to move off the edge
+        - If move is successful, Energy is reduced by 1
+
+    P - Plant a crop
+        - Option will only appear if on an empty space
+        - Shows error message if there are no seeds in the bag
+        - If successful, Energy is reduced by 1
+
+    H - Harvests a crop
+        - Option will only appear if crop can be harvested, i.e., turns
+        left to grow is 0
+        - Option shows the money gained after harvesting
+        - If successful, Energy is reduced by 1
+
+    R - Return to town
+        - Does not cost energy
+    '''
+    visit_farm(farm,game_vars)
+    while True:
+        try:
+            farm_choice = input("Your choice? ").upper()
+            if farm_choice in ['W','A','S','D']:
+                move(farm, farm_choice, game_vars)
+            elif farm_choice == 'P':
+                plant_seed(farm, game_vars)
+            elif farm_choice == 'H':
+                harvest_crop(farm, game_vars)
+            elif farm_choice == 'R':
+                reset_farm(farm) # Move player back to farmhouse if he chooses to return to town
+                return False
+            else:
+                print("Invalid choice. Please enter a valid choice.")
+        except ValueError:
+            print("Invalid input. Please enter a valid choice.")
 
 def find_position(farm):
     '''
@@ -472,48 +514,6 @@ def harvest_crop(farm, game_vars):
 
     else:
         print("You are unable to harvest!")
-
-def in_farm():
-    '''
-    Handles the actions on the farm. Player starts at (2,2), at the
-    farmhouse.
-
-    Possible actions:
-    W, A, S, D - Moves the player
-        - Will show error message if attempting to move off the edge
-        - If move is successful, Energy is reduced by 1
-
-    P - Plant a crop
-        - Option will only appear if on an empty space
-        - Shows error message if there are no seeds in the bag
-        - If successful, Energy is reduced by 1
-
-    H - Harvests a crop
-        - Option will only appear if crop can be harvested, i.e., turns
-        left to grow is 0
-        - Option shows the money gained after harvesting
-        - If successful, Energy is reduced by 1
-
-    R - Return to town
-        - Does not cost energy
-    '''
-    visit_farm(farm,game_vars)
-    while True:
-        try:
-            farm_choice = input("Your choice? ").upper()
-            if farm_choice in ['W','A','S','D']:
-                move(farm, farm_choice, game_vars)
-            elif farm_choice == 'P':
-                plant_seed(farm, game_vars)
-            elif farm_choice == 'H':
-                harvest_crop(farm, game_vars)
-            elif farm_choice == 'R':
-                reset_farm(farm) # Move player back to farmhouse if he chooses to return to town
-                return False
-            else:
-                print("Invalid choice. Please enter a valid choice.")
-        except ValueError:
-            print("Invalid input. Please enter a valid choice.")
 
 def end_day(game_vars):
     '''
