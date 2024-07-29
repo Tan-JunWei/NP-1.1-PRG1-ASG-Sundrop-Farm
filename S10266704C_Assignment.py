@@ -1,3 +1,5 @@
+import random
+
 # Game variables
 game_vars = {
     'day': 1,
@@ -576,6 +578,11 @@ def load_game(game_vars, farm):
         game_vars['bag']['Lettuce'] = int(lines[3].strip())
         game_vars['bag']['Potato'] = int(lines[4].strip())
         game_vars['bag']['Cauliflower'] = int(lines[5].strip())
+        
+        for line in lines[6:]:
+            farm_load_list = line.strip().split(",")
+            farm_load_list = [int(farm_load_list[0]), int(farm_load_list[1]), farm_load_list[2].split(":")]
+            farm[farm_load_list[0]][farm_load_list[1]] = farm_load_list[2]
         print("Game saved.")
 
 #----------------------------------------------------------------------
