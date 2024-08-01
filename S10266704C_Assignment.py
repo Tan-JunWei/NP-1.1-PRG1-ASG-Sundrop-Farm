@@ -125,13 +125,13 @@ def game(game_vars, farm):
                 # 3) End Day
                 break_game = end_day(game_vars)
                 if break_game:
-                    break
+                    return True
             case "9":
                 break_game = save_game(game_vars, farm)
                 return break_game
             case "0":
                 print("Goodbye!")
-                return False
+                return True
             case _:
                 print("Invalid choice. Please enter a valid option (0,1,2,3,9).")
 
@@ -620,7 +620,7 @@ def save_game(game_vars, farm):
                 file.write(f"{row},{col},{farm[row][col][0]}:{farm[row][col][1]}:{farm[row][col][2]}\n")
 
         print("Game saved.")
-        return False
+        return True
 
 def load_game(game_vars, farm):
     '''
@@ -651,8 +651,8 @@ def load_game(game_vars, farm):
 #----------------------------------------------------------------------
 #    Main Game Loop
 #----------------------------------------------------------------------
-break_game = True
-while break_game:
+break_game = False
+while not break_game:
     display_main_menu()
     try:
         option = input("Your choice? ")
@@ -682,4 +682,3 @@ while break_game:
 
     except ValueError:
         print("Enter a valid number (1,2,0).")
-
