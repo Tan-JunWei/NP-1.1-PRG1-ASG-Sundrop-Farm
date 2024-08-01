@@ -47,6 +47,7 @@ def display_main_menu():
     Players can: 
         1) Start a new game
         2) Load a saved game
+        3) Show High Scores Leaderboard
         0) Exit the game
     """
 
@@ -58,8 +59,9 @@ def display_main_menu():
       "How successful will you be?\n"
       "----------------------------------------------------------\n"
       "1) Start a new game\n"
-      "2) Load your saved game\n\n"
-      "3) Exit Game")
+      "2) Load your saved game\n"
+      "3) Show High Scores Leaderboard\n\n"
+      "0) Exit Game")
     
 def in_town(game_vars):
     '''
@@ -502,6 +504,12 @@ def giant_crops(farm, game_vars):
     If every crop in a 2x2 square on the farm is of the same
     type and are all ready to harvest, you can harvest all 4 of the crops using 1 Energy.
     You must be standing in the top left-hand corner of the 2x2 square.
+        Option will only appear if crop can be harvested i.e. days left to grow is 0
+        Displays the money gained after harvesting
+        If successful, Energy is reduced by 1
+    Args:
+        farm: A list of lists containing the farm layout
+        game_vars: A dictionary containing game variables('day','energy','money','bag')
     '''
     row, col = find_position(farm)
 
@@ -526,19 +534,17 @@ def giant_crops(farm, game_vars):
     else:
         print("You are unable to giant harvest!")
 
-def high_score_board():
+def high_score_board(name, final_amount):
     '''
     High Score Board (5 marks) : If a player wins the game, they will be prompted for their name, which 
     will be stored in a text file along with their final profit amount. There will be an additional 
     option in the main menu “2) Show High Scores” that will display the list of high scores on screen, 
     sorted in descending order of profit. The game will only store the top 5 scores.
     '''
-    name = input("Enter your name: ")
-    final_amount = game_vars['money']
-
     with open("high_scores.txt", "a+") as file:
         scores = []
-        file.write(f",{name}${final_amount}")
+        if name:
+            file.write(f",{name}${final_amount}")
         file.seek(0)
         scores_list = file.readline().strip().split(",")
 
@@ -581,7 +587,9 @@ def end_day(game_vars):
         if game_vars['money'] >= 100:
             print(f"You paid off your debt of $100 and made a profit of ${game_vars['money'] - 100}.")
             print("You win!")
-            high_score_board()
+            name = input("Enter your name: ")
+            final_amount = game_vars['money']
+            high_score_board(name, final_amount)
         else: 
             print("You have run out of time to pay off your debt. You lose.")
 
@@ -662,6 +670,12 @@ while break_game:
             case "2":
                 load_game(game_vars,farm)
                 break_game = game(game_vars,farm)
+
+            case "3":
+                # 3) Show High Scores Leaderboard
+                high_score_board(name=None, final_amount=20)
+                print()
+                print() # empty lines
             case _:
                 # Integer input but not 1, 2 or 0
                 print("Invalid choice. Please enter a valid option (0,1,2).")
