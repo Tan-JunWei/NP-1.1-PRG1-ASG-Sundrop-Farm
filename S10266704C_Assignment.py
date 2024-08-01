@@ -291,12 +291,21 @@ def visit_farm(farm, game_vars):
 
     # print options according to the player's position
     row_x, col_x = find_position(farm)
+
     print(f"Energy: {game_vars['energy']}")
     print("[WASD] Move")
+
     if farm[row_x][col_x][0] == '' and farm[row_x][col_x][2] == '': # plant seed option
         print("P)lant seed")
+
     elif farm[row_x][col_x][0] != '' and farm[row_x][col_x][2] == '0': # harvest seed option
         print(f"H)arvest {seeds[farm[row_x][col_x][0]]['name']} for ${seeds[farm[row_x][col_x][0]]['crop_price']}")
+
+        ready_for_giant_harvest = farm[row_x][col_x][2] == "0" and farm[row_x][col_x+1][2] == "0" and farm[row_x+1][col_x][2] == "0" and farm[row_x+1][col_x+1][2] == "0"
+        same_type = farm[row_x][col_x][0] and farm[row_x][col_x+1][0] and farm[row_x+1][col_x][0] and farm[row_x+1][col_x+1][0]
+        if ready_for_giant_harvest and same_type: # giant harvest option
+            print(f"G)iant Harvest {seeds[farm[row_x][col_x][0]]['name']} for ${seeds[farm[row_x][col_x][0]]['crop_price'] * 4}")
+
     print("R)eturn to Town")
 
 def in_farm():
@@ -331,6 +340,8 @@ def in_farm():
                 plant_seed(farm, game_vars)
             elif farm_choice == 'H':
                 harvest_crop(farm, game_vars)
+            elif farm_choice == 'G':
+                giant_crops(farm, game_vars)
             elif farm_choice == 'R':
                 reset_farm(farm) # Move player back to farmhouse if he chooses to return to town
                 return False
@@ -486,6 +497,35 @@ def harvest_crop(farm, game_vars):
     else:
         print("You are unable to harvest!")
 
+def giant_crops(farm, game_vars):
+    '''
+    If every crop in a 2x2 square on the farm is of the same
+    type and are all ready to harvest, you can harvest all 4 of the crops using 1 Energy.
+    You must be standing in the top left-hand corner of the 2x2 square.
+    '''
+    row, col = find_position(farm)
+
+    ready_for_giant_harvest = farm[row][col][2] == "0" and farm[row][col+1][2] == "0" and farm[row+1][col][2] == "0" and farm[row+1][col+1][2] == "0"
+    same_type = farm[row][col][0] and farm[row][col+1][0] and farm[row+1][col][0] and farm[row+1][col+1][0]
+
+    if ready_for_giant_harvest and same_type: # check if crop is ready for harvest
+        game_vars['energy'] -= 1
+        game_vars['money'] += seeds[farm[row][col][0]]['crop_price'] * 4
+
+        print(f"You harvested 4 {seeds[farm[row][col][0]]['name'].capitalize()} and sold it for ${seeds[farm[row][col][0]]['crop_price'] * 4}!")
+        print(f"You now have ${game_vars['money']}!")
+
+        # empty square after harvest
+        farm[row][col][0], farm[row][col][2]= '', ''
+        farm[row][col+1][0], farm[row][col+1][2]= '', ''
+        farm[row+1][col][0], farm[row+1][col][2]= '', ''
+        farm[row+1][col+1][0], farm[row+1][col+1][2]= '', ''
+
+        visit_farm(farm, game_vars)
+
+    else:
+        print("You are unable to giant harvest!")
+
 def high_score_board():
     '''
     High Score Board (5 marks) : If a player wins the game, they will be prompted for their name, which 
@@ -505,7 +545,7 @@ def high_score_board():
         if len(scores_list) > 2:
             scores_list = [score.split("$") for score in scores_list]
             for score in scores_list:
-                score = [score[0], int(score[1])]
+                score = [score[0], int(score[1]) - 100] # calculate profit amount from total amount
                 scores.append(score)
 
             # bubble sort algorithm
@@ -515,7 +555,7 @@ def high_score_board():
                         scores[j], scores[j+1] = scores[j+1], scores[j]
 
         # print leaderboard
-        print("Leaderboard")
+        print("\nLeaderboard")
         print("----------------------------------------------------------")
         print(f"{'Rank':<7} {'Name':<10} {'Score'}")
         print("----------------------------------------------------------")
@@ -534,8 +574,9 @@ def end_day(game_vars):
     Args:
         game_vars: A dictionary containing game variables('day','energy','money','bag')
     '''
+    break_loop = False
     if game_vars['day'] == 20:
-        break_game = True # if day is 20, game ends
+        break_loop = True # if day is 20, game ends
         print(f"You have ${game_vars['money']} after 20 days.")
         if game_vars['money'] >= 100:
             print(f"You paid off your debt of $100 and made a profit of ${game_vars['money'] - 100}.")
@@ -552,7 +593,7 @@ def end_day(game_vars):
         for col in range(len(farm[0])):
             if farm[row][col][2] != '': 
                 farm[row][col][2] = str(max(0, int(farm[row][col][2]) - 1)) # max returns the maximum of two values
-    return break_game
+    return break_loop
 
 def save_game(game_vars, farm):
     '''
