@@ -1,6 +1,3 @@
-import random
-import sys
-
 # Game variables
 game_vars = {
     'day': 1,
@@ -86,7 +83,6 @@ def in_town(game_vars):
 
         9) Save the game to file
         0) Exit the game (without saving)
-
     Args:
         game_vars: A dictionary containing game variables('day','energy','money','bag')
     
@@ -141,11 +137,11 @@ def game(game_vars, farm):
                 if break_game:
                     break
             case "9":
-                save_game(game_vars, farm)
-                break
+                break_game = save_game(game_vars, farm)
+                return break_game
             case "0":
-                break
-                # sys.exit()
+                print("Goodbye!")
+                return False
             case _:
                 print("Invalid choice. Please enter a valid option (0,1,2,3,9).")
 
@@ -515,6 +511,25 @@ def harvest_crop(farm, game_vars):
     else:
         print("You are unable to harvest!")
 
+# def high_score_board():
+#     '''
+#     High Score Board (5 marks) : If a player wins the game, they will be prompted for their name, which 
+#     will be stored in a text file along with their final profit amount. There will be an additional 
+#     option in the main menu “2) Show High Scores” that will display the list of high scores on screen, 
+#     sorted in descending order of profit. The
+#     game will only store the top 5 scores.
+#     '''
+#     name = input("Enter your name: ")
+#     final_amount = game_vars['money']
+#     try:
+#         with open("high_scores.txt", "r") as file:
+#             high_scores = file.readlines()
+#             print(high_scores)
+#     except FileNotFoundError:
+#         print("Leaderboard")
+#         print("----------------------------------------------------------")
+#         print(f"{name}: ${final_amount}") # if file is not found, no high scores to display. user is the first high scorer
+
 def end_day(game_vars):
     '''
     Ends the day
@@ -525,13 +540,13 @@ def end_day(game_vars):
         game_vars: A dictionary containing game variables('day','energy','money','bag')
     '''
     break_game = False
-
     if game_vars['day'] == 20:
-        print(f"You have ${game_vars['money']} after 20 days.")
         break_game = True
+        print(f"You have ${game_vars['money']} after 20 days.")
         if game_vars['money'] >= 100:
             print(f"You paid off your debt of $100 and made a profit of ${game_vars['money'] - 100}.")
             print("You win!")
+            # high_score_board()
         else: 
             print("You have run out of time to pay off your debt. You lose.")
 
@@ -543,7 +558,6 @@ def end_day(game_vars):
         for col in range(len(farm[0])):
             if farm[row][col][2] != '': 
                 farm[row][col][2] = str(max(0, int(farm[row][col][2]) - 1)) # max returns the maximum of two values
-    
     return break_game
 
 def save_game(game_vars, farm):
@@ -563,6 +577,7 @@ def save_game(game_vars, farm):
                 file.write(f"{row},{col},{farm[row][col][0]}:{farm[row][col][1]}:{farm[row][col][2]}\n")
 
         print("Game saved.")
+        return False
 
 def load_game(game_vars, farm):
     '''
@@ -593,8 +608,8 @@ def load_game(game_vars, farm):
 #----------------------------------------------------------------------
 #    Main Game Loop
 #----------------------------------------------------------------------
-
-while True:
+break_game = True
+while break_game:
     display_main_menu()
     try:
         option = input("Your choice? ")
@@ -607,11 +622,11 @@ while True:
                 break
 
             case "1":
-                game(game_vars,farm)
+                break_game = game(game_vars,farm)
 
             case "2":
                 load_game(game_vars,farm)
-                game(game_vars,farm)
+                break_game = game(game_vars,farm)
             case _:
                 # Integer input but not 1, 2 or 0
                 print("Invalid choice. Please enter a valid option (0,1,2).")
