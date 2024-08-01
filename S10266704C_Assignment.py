@@ -486,24 +486,44 @@ def harvest_crop(farm, game_vars):
     else:
         print("You are unable to harvest!")
 
-# def high_score_board():
-#     '''
-#     High Score Board (5 marks) : If a player wins the game, they will be prompted for their name, which 
-#     will be stored in a text file along with their final profit amount. There will be an additional 
-#     option in the main menu “2) Show High Scores” that will display the list of high scores on screen, 
-#     sorted in descending order of profit. The
-#     game will only store the top 5 scores.
-#     '''
-#     name = input("Enter your name: ")
-#     final_amount = game_vars['money']
-#     try:
-#         with open("high_scores.txt", "r") as file:
-#             high_scores = file.readlines()
-#             print(high_scores)
-#     except FileNotFoundError:
-#         print("Leaderboard")
-#         print("----------------------------------------------------------")
-#         print(f"{name}: ${final_amount}") # if file is not found, no high scores to display. user is the first high scorer
+def high_score_board():
+    '''
+    High Score Board (5 marks) : If a player wins the game, they will be prompted for their name, which 
+    will be stored in a text file along with their final profit amount. There will be an additional 
+    option in the main menu “2) Show High Scores” that will display the list of high scores on screen, 
+    sorted in descending order of profit. The game will only store the top 5 scores.
+    '''
+    name = input("Enter your name: ")
+    final_amount = game_vars['money']
+
+    with open("high_scores.txt", "a+") as file:
+        scores = []
+        file.write(f",{name}${final_amount}")
+        file.seek(0)
+        scores_list = file.readline().strip().split(",")
+
+        if len(scores_list) > 2:
+            scores_list = [score.split("$") for score in scores_list]
+            for score in scores_list:
+                score = [score[0], int(score[1])]
+                scores.append(score)
+
+            # bubble sort algorithm
+            for i in range(len(scores)):
+                for j in range(len(scores) - i -1):
+                    if scores[j][1] < scores[j+1][1]:
+                        scores[j], scores[j+1] = scores[j+1], scores[j]
+
+        # print leaderboard
+        print("Leaderboard")
+        print("----------------------------------------------------------")
+        print(f"{'Rank':<7} {'Name':<10} {'Score'}")
+        print("----------------------------------------------------------")
+
+        for i in range(5): # only display top 5 scores
+            print(f"{i+1:<7} {scores[i][0]:<10} ${scores[i][1]}")
+
+    # don't need to catch FileNotFoundError as a file is automatically created if it doesn't exist 
 
 def end_day(game_vars):
     '''
@@ -520,7 +540,7 @@ def end_day(game_vars):
         if game_vars['money'] >= 100:
             print(f"You paid off your debt of $100 and made a profit of ${game_vars['money'] - 100}.")
             print("You win!")
-            # high_score_board()
+            high_score_board()
         else: 
             print("You have run out of time to pay off your debt. You lose.")
 
