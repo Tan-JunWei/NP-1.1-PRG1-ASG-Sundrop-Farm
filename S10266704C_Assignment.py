@@ -126,9 +126,9 @@ def game(game_vars, farm):
                 break_game = end_day(game_vars)
                 if break_game:
                     return True
+                print("It's a new day!")
             case "9":
-                break_game = save_game(game_vars, farm)
-                return break_game
+                save_game(game_vars, farm)
             case "0":
                 print("Goodbye!")
                 return True
@@ -303,10 +303,19 @@ def visit_farm(farm, game_vars):
     elif farm[row_x][col_x][0] != '' and farm[row_x][col_x][2] == '0': # harvest seed option
         print(f"H)arvest {seeds[farm[row_x][col_x][0]]['name']} for ${seeds[farm[row_x][col_x][0]]['crop_price']}")
 
-        ready_for_giant_harvest = farm[row_x][col_x][2] == "0" and farm[row_x][col_x+1][2] == "0" and farm[row_x+1][col_x][2] == "0" and farm[row_x+1][col_x+1][2] == "0"
-        same_type = farm[row_x][col_x][0] and farm[row_x][col_x+1][0] and farm[row_x+1][col_x][0] and farm[row_x+1][col_x+1][0]
-        if ready_for_giant_harvest and same_type: # giant harvest option
-            print(f"G)iant Harvest {seeds[farm[row_x][col_x][0]]['name']} for ${seeds[farm[row_x][col_x][0]]['crop_price'] * 4}")
+        # 1 step further: check if giant harvest is possible
+        if row_x + 1 < len(farm) and col_x + 1 < len(farm[0]):
+            ready_for_giant_harvest = (
+                farm[row_x][col_x][2] == "0" and
+                farm[row_x][col_x+1][2] == "0" and
+                farm[row_x+1][col_x][2] == "0" and
+                farm[row_x+1][col_x+1][2] == "0"
+            )
+            same_type = (
+                farm[row_x][col_x][0] == farm[row_x][col_x+1][0] == farm[row_x+1][col_x][0] == farm[row_x+1][col_x+1][0]
+            )
+            if ready_for_giant_harvest and same_type: # giant harvest option
+                print(f"G)iant Harvest {seeds[farm[row_x][col_x][0]]['name']} for ${seeds[farm[row_x][col_x][0]]['crop_price'] * 4}")
 
     print("R)eturn to Town")
 
@@ -513,26 +522,34 @@ def giant_crops(farm, game_vars):
     '''
     row, col = find_position(farm)
 
-    ready_for_giant_harvest = farm[row][col][2] == "0" and farm[row][col+1][2] == "0" and farm[row+1][col][2] == "0" and farm[row+1][col+1][2] == "0"
-    same_type = farm[row][col][0] and farm[row][col+1][0] and farm[row+1][col][0] and farm[row+1][col+1][0]
+    if row + 1 < len(farm) and col + 1 < len(farm[0]):
+        ready_for_giant_harvest = (
+            farm[row][col][2] == "0" and
+            farm[row][col+1][2] == "0" and
+            farm[row+1][col][2] == "0" and
+            farm[row+1][col+1][2] == "0"
+        )
+        same_type = (
+            farm[row][col][0] == farm[row][col+1][0] == farm[row+1][col][0] == farm[row+1][col+1][0]
+        )
 
-    if ready_for_giant_harvest and same_type: # check if crop is ready for harvest
-        game_vars['energy'] -= 1
-        game_vars['money'] += seeds[farm[row][col][0]]['crop_price'] * 4
+        if ready_for_giant_harvest and same_type: # check if crop is ready for harvest
+            game_vars['energy'] -= 1
+            game_vars['money'] += seeds[farm[row][col][0]]['crop_price'] * 4
 
-        print(f"You harvested 4 {seeds[farm[row][col][0]]['name'].capitalize()} and sold it for ${seeds[farm[row][col][0]]['crop_price'] * 4}!")
-        print(f"You now have ${game_vars['money']}!")
+            print(f"You harvested 4 {seeds[farm[row][col][0]]['name'].capitalize()} and sold it for ${seeds[farm[row][col][0]]['crop_price'] * 4}!")
+            print(f"You now have ${game_vars['money']}!")
 
-        # empty square after harvest
-        farm[row][col][0], farm[row][col][2]= '', ''
-        farm[row][col+1][0], farm[row][col+1][2]= '', ''
-        farm[row+1][col][0], farm[row+1][col][2]= '', ''
-        farm[row+1][col+1][0], farm[row+1][col+1][2]= '', ''
+            # empty square after harvest
+            farm[row][col][0], farm[row][col][2]= '', ''
+            farm[row][col+1][0], farm[row][col+1][2]= '', ''
+            farm[row+1][col][0], farm[row+1][col][2]= '', ''
+            farm[row+1][col+1][0], farm[row+1][col+1][2]= '', ''
 
-        visit_farm(farm, game_vars)
+            visit_farm(farm, game_vars)
 
-    else:
-        print("You are unable to giant harvest!")
+        else:
+            print("You are unable to giant harvest!")
 
 def high_score_board(name, final_amount):
     '''
@@ -570,7 +587,7 @@ def high_score_board(name, final_amount):
         
         else:
             print("No high scores yet.")
-            
+
         print("----------------------------------------------------------")
 
     # don't need to catch FileNotFoundError as a file is automatically created if it doesn't exist 
@@ -624,7 +641,6 @@ def save_game(game_vars, farm):
                 file.write(f"{row},{col},{farm[row][col][0]}:{farm[row][col][1]}:{farm[row][col][2]}\n")
 
         print("Game saved.")
-        return True
 
 def load_game(game_vars, farm):
     '''
