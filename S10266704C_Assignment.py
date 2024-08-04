@@ -548,6 +548,8 @@ def high_score_board(name, final_amount):
         file.seek(0)
         scores_list = file.readline().strip().split(",")
 
+        print("\nLeaderboard") # out of conditonal block as it will always be displayed
+        print("----------------------------------------------------------")
         if len(scores_list) > 2:
             scores_list = [score.split("$") for score in scores_list]
             for score in scores_list:
@@ -560,14 +562,16 @@ def high_score_board(name, final_amount):
                     if scores[j][1] < scores[j+1][1]:
                         scores[j], scores[j+1] = scores[j+1], scores[j]
 
-        # print leaderboard
-        print("\nLeaderboard")
-        print("----------------------------------------------------------")
-        print(f"{'Rank':<7} {'Name':<10} {'Score'}")
-        print("----------------------------------------------------------")
+            # print leaderboard
+            print(f"{'Rank':<7} {'Name':<10} {'Score'}")
 
-        for i in range(5): # only display top 5 scores
-            print(f"{i+1:<7} {scores[i][0]:<10} ${scores[i][1]}")
+            for i in range(5): # only display top 5 scores
+                print(f"{i+1:<7} {scores[i][0]:<10} ${scores[i][1]}")
+        
+        else:
+            print("No high scores yet.")
+            
+        print("----------------------------------------------------------")
 
     # don't need to catch FileNotFoundError as a file is automatically created if it doesn't exist 
 
