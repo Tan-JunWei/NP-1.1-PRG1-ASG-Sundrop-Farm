@@ -653,6 +653,12 @@ def load_game(game_vars, farm):
     try:
         with open("savegame.txt", "r") as file:
             lines = file.readlines()
+
+            if not lines: # if save game file somehow exists but is empty
+                print("Save game file is empty.")
+                print("Starting a new game.")
+                return
+                        
             game_vars['day'] = int(lines[0].strip())
             game_vars['energy'] = int(lines[1].strip())
             game_vars['money'] = int(lines[2].strip())
@@ -665,6 +671,7 @@ def load_game(game_vars, farm):
                 farm_load_list = [int(farm_load_list[0]), int(farm_load_list[1]), farm_load_list[2].split(":")]
                 farm[farm_load_list[0]][farm_load_list[1]] = farm_load_list[2]
             print("Game saved.")
+
     except FileNotFoundError:
         print("No saved game found.")
 
