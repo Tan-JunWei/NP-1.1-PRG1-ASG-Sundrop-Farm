@@ -559,9 +559,14 @@ def high_score_board(name, final_amount):
     sorted in descending order of profit. The game will only store the top 5 scores.
     '''
     with open("high_scores.txt", "a+") as file:
+        # The file pointer is placed at the end of the file for appending but can be moved to the 
+        # beginning or any position for reading.
+
         scores = []
+
         if name:
             file.write(f",{name}${final_amount}")
+
         file.seek(0)
         scores_list = file.readline().strip().split(",")
 
@@ -581,13 +586,11 @@ def high_score_board(name, final_amount):
 
             # print leaderboard
             print(f"{'Rank':<7} {'Name':<10} {'Score'}")
-
             for i in range(5): # only display top 5 scores
                 print(f"{i+1:<7} {scores[i][0]:<10} ${scores[i][1]}")
         
         else:
             print("No high scores yet.")
-
         print("----------------------------------------------------------")
 
     # don't need to catch FileNotFoundError as a file is automatically created if it doesn't exist 
@@ -610,7 +613,7 @@ def end_day(game_vars):
             print("You win!")
             name = input("Enter your name: ")
             final_amount = game_vars['money']
-            high_score_board(name, final_amount)
+            high_score_board(name, final_amount) # display high scores leaderboard
         else: 
             print("You have run out of time to pay off your debt. You lose.")
 
@@ -701,8 +704,8 @@ while not break_game:
             case "3":
                 # 3) Show High Scores Leaderboard
                 high_score_board(name=None, final_amount=20)
-                print()
-                print() # empty lines
+                print("\n"*2) # empty lines for better readability
+
             case _:
                 # Integer input but not 1, 2 or 0
                 print("Invalid choice. Please enter a valid option (0,1,2).")
